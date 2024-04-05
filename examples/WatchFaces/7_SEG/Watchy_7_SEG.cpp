@@ -121,7 +121,11 @@ void Watchy7SEG::drawWeather(){
         display.getTextBounds(String(temperature), 0, 0, &x1, &y1, &w, &h);
         display.setCursor(159 - w - x1, 136);
     }
-    display.println(temperature);
+    if(WIFI_CONFIGURED){
+      display.println(temperature);
+    }else{
+      //nothing
+    }
     display.drawBitmap(165, 110, currentWeather.isMetric ? celsius : fahrenheit, 26, 20, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
     const unsigned char* weatherIcon;
 
