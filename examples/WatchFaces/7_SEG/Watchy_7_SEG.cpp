@@ -7,6 +7,8 @@ const uint8_t BATTERY_SEGMENT_HEIGHT = 11;
 const uint8_t BATTERY_SEGMENT_SPACING = 9;
 const uint8_t WEATHER_ICON_WIDTH = 48;
 const uint8_t WEATHER_ICON_HEIGHT = 32;
+static int8_t lastKnownTemperature = 0; // Initialize with a default value
+
 
 void Watchy7SEG::drawWatchFace(){
     display.fillScreen(DARKMODE ? GxEPD_BLACK : GxEPD_WHITE);
@@ -105,7 +107,7 @@ void Watchy7SEG::drawBattery(){
 
 void Watchy7SEG::drawWeather(){
 
-    weatherData currentWeather = getWeatherData();
+    weatherData currentWeather;
 
     int8_t temperature = currentWeather.temperature;
     int16_t weatherConditionCode = currentWeather.weatherConditionCode;
@@ -121,13 +123,16 @@ void Watchy7SEG::drawWeather(){
         display.getTextBounds(String(temperature), 0, 0, &x1, &y1, &w, &h);
         display.setCursor(159 - w - x1, 136);
     }
-    if(WIFI_CONFIGURED){
-      display.println(temperature);
-    }else{
-      //nothing
-    }
-    display.drawBitmap(165, 110, currentWeather.isMetric ? celsius : fahrenheit, 26, 20, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
     const unsigned char* weatherIcon;
+    if(WIFI_CONFIGURED){
+      currentWeather = getWeatherData();
+      lastKnownTemperature = currentWeather.temperature; // Update last known temperature
+      display.println(temperature);
+      display.drawBitmap(165, 110, currentWeather.isMetric ? celsius : fahrenheit, 26, 20, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    }else{
+      currentWeather.temperature = lastKnownTemperature; // Use the last known temperature
+    }
+
 
     if(WIFI_CONFIGURED){
       //https://openweathermap.org/weather-conditions
